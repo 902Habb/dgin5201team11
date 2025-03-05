@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COM-B Framework Analysis Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Add Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --info-color: #3498db;
+            --purple-color: #9b59b6;
+            --orange-color: #e67e22;
+            
+            /* Font variables */
+            --font-primary: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+        }
+        
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            padding-top: 2rem;
+            min-height: 100vh;
+            font-weight: var(--font-weight-normal);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-primary);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            font-weight: var(--font-weight-semibold);
+            letter-spacing: -0.01em;
+        }
+
+        .sidebar-title {
+            font-weight: var(--font-weight-bold);
+            letter-spacing: -0.01em;
+        }
+
+        .history-text {
+            font-weight: var(--font-weight-medium);
+        }
+
+        .history-category {
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .alert {
+            font-weight: var(--font-weight-normal);
+        }
+
+        .alert h5 {
+            font-weight: var(--font-weight-bold);
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            font-weight: var(--font-weight-medium);
+            padding: 0.5em 0.8em;
+            font-size: 0.85em;
+        }
+
+        #analyzeBtn {
+            font-weight: var(--font-weight-semibold);
+            letter-spacing: 0.01em;
+        }
+
+        .card-title {
+            font-weight: var(--font-weight-bold);
+            letter-spacing: -0.01em;
+        }
+        
+        .container-fluid {
+            padding: 0;
+        }
+        
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+            transition: margin-left 0.3s;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .history-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .history-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .history-time {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            border: none;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: var(--accent-color);
+        }
+        
+        .category-card {
+            margin-bottom: 15px;
+            border-left: 5px solid;
+        }
+        
+        .capability-physical {
+            border-left-color: var(--info-color);
+        }
+        
+        .capability-psychological {
+            border-left-color: var(--success-color);
+        }
+        
+        .opportunity-social {
+            border-left-color: var(--warning-color);
+        }
+        
+        .opportunity-physical {
+            border-left-color: var(--danger-color);
+        }
+        
+        .motivation-automatic {
+            border-left-color: var(--purple-color);
+        }
+        
+        .motivation-reflective {
+            border-left-color: var(--orange-color);
+        }
+        
+        .confidence-bar {
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            font-weight: 500;
+        }
+        
+        .analysis-time {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        
+        .empty-history {
+            padding: 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+        }
+        
+        .clear-history {
+            margin: 15px 20px;
+            padding: 8px 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: calc(100% - 40px);
+        }
+        
+        .clear-history:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .toggle-sidebar {
+                display: block;
+            }
+        }
+        
+        .toggle-sidebar {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 12px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <button class="toggle-sidebar" id="toggleSidebar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/>
+            </svg>
+        </button>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">Analysis History</h2>
+            </div>
+            <div id="historyContainer">
+                <div class="empty-history" id="emptyHistory">
+                    No analysis history yet
+                </div>
+                <ul class="history-list" id="historyList">
+                    <!-- History items will be added here dynamically -->
+                </ul>
+            </div>
+            <button class="clear-history" id="clearHistory">Clear History</button>
+        </div>
+        
+        <div class="main-content">
+            <h1 class="text-center mb-4">COM-B Framework Analysis Assistant</h1>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    About COM-B Framework
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5>What is the COM-B Framework?</h5>
+                            <p>The COM-B framework is a comprehensive model for understanding behavior change. It consists of three main components, with six categories:</p>
+                            <ul>
+                                <li><strong>Capability</strong> - Physical and psychological ability to perform a behavior
+                                    <ul>
+                                        <li><span class="badge" style="background-color: #3498db;">Physical Capability</span> - Physical skills, strength, or stamina</li>
+                                        <li><span class="badge" style="background-color: #2ecc71;">Psychological Capability</span> - Knowledge, cognitive and interpersonal skills, memory, attention</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Opportunity</strong> - External factors that enable or prompt behavior
+                                    <ul>
+                                        <li><span class="badge" style="background-color: #f39c12;">Social Opportunity</span> - Cultural norms, social cues, interpersonal influences</li>
+                                        <li><span class="badge" style="background-color: #e74c3c;">Physical Opportunity</span> - Environmental factors, resources, time, locations, physical barriers</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Motivation</strong> - Internal processes that energize and direct behavior
+                                    <ul>
+                                        <li><span class="badge" style="background-color: #9b59b6;">Automatic Motivation</span> - Emotions, impulses, desires, habits, reflexes</li>
+                                        <li><span class="badge" style="background-color: #e67e22;">Reflective Motivation</span> - Plans, evaluations, commitments, intentions, beliefs</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-info">
+                                <h5>Purpose of this Tool</h5>
+                                <p>This tool is designed to <strong>assist</strong> qualitative researchers in analyzing text using the COM-B framework, not to replace human analysis.</p>
+                                <p>It provides suggestions for how text might be categorized, but the final interpretation and analysis should be done by the researcher.</p>
+                                <p>Use this as a starting point or to validate your own coding decisions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    Input Text
+                </div>
+                <div class="card-body">
+                    <form id="analyzeForm">
+                        <div class="mb-3">
+                            <label for="textInput" class="form-label">Enter text to analyze:</label>
+                            <textarea class="form-control" id="textInput" name="text" rows="5" placeholder="Paste your text here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="analyzeBtn">Analyze Text</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Analyzing text... This should take less than a minute.</p>
+            </div>
+            
+            <div id="resultsContainer" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        Analysis Results
+                    </div>
+                    <div class="card-body">
+                        <div id="errorMessage" class="error-message" style="display: none;"></div>
+                        <div id="analysisTime" class="analysis-time"></div>
+                        <div id="resultsContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize history from localStorage
+        let analysisHistory = JSON.parse(localStorage.getItem('analysisHistory')) || [];
+        
+        // Update sidebar on load
+        updateHistorySidebar();
+        
+        // Toggle sidebar on mobile
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+        
+        // Clear history button
+        document.getElementById('clearHistory').addEventListener('click', function() {
+            if (confirm('Are you sure you want to clear all analysis history?')) {
+                analysisHistory = [];
+                localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+                updateHistorySidebar();
+            }
+        });
+        
+        document.getElementById('analyzeForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const textInput = document.getElementById('textInput').value.trim();
+            if (!textInput) {
+                alert('Please enter some text to analyze.');
+                return;
+            }
+            
+            // Show loading indicator
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('resultsContainer').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = true;
+            
+            try {
+                const formData = new FormData();
+                formData.append('text', textInput);
+                
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Hide loading indicator
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('resultsContainer').style.display = 'block';
+                document.getElementById('analyzeBtn').disabled = false;
+                
+                // Display analysis time if available
+                if (data.analysis_time) {
+                    document.getElementById('analysisTime').textContent = `Analysis completed in ${data.analysis_time}`;
+                    document.getElementById('analysisTime').style.display = 'block';
+                } else {
+                    document.getElementById('analysisTime').style.display = 'none';
+                }
+                
+                // Display results or error
+                if (data.error) {
+                    document.getElementById('errorMessage').textContent = data.error;
+                    document.getElementById('errorMessage').style.display = 'block';
+                    document.getElementById('resultsContent').innerHTML = '';
+                } else {
+                    document.getElementById('errorMessage').style.display = 'none';
+                    displayResults(data);
+                    
+                    // Save to history
+                    saveToHistory(textInput, data);
+                }
+            } catch (error) {
+                // Hide loading indicator
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('analyzeBtn').disabled = false;
+                
+                // Display error
+                document.getElementById('resultsContainer').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'An error occurred while analyzing the text.';
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('resultsContent').innerHTML = '';
+            }
+        });
+        
+        function saveToHistory(text, results) {
+            // Create a history item
+            const historyItem = {
+                id: Date.now().toString(),
+                timestamp: new Date().toISOString(),
+                text: text,
+                results: results,
+                displayTime: new Date().toLocaleString()
+            };
+            
+            // Add to history array (at the beginning)
+            analysisHistory.unshift(historyItem);
+            
+            // Limit history to 50 items
+            if (analysisHistory.length > 50) {
+                analysisHistory = analysisHistory.slice(0, 50);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+            
+            // Update the sidebar
+            updateHistorySidebar();
+        }
+        
+        function updateHistorySidebar() {
+            const historyList = document.getElementById('historyList');
+            const emptyHistory = document.getElementById('emptyHistory');
+            
+            // Clear current list
+            historyList.innerHTML = '';
+            
+            if (analysisHistory.length === 0) {
+                emptyHistory.style.display = 'block';
+                return;
+            }
+            
+            emptyHistory.style.display = 'none';
+            
+            // Add each history item to the list
+            analysisHistory.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.dataset.id = item.id;
+                
+                // Get the top category if available
+                let topCategory = 'No categories found';
+                let confidence = '';
+                
+                if (item.results.categories && item.results.categories.length > 0) {
+                    topCategory = item.results.categories[0].category;
+                    confidence = ` (${Math.round(item.results.categories[0].confidence)}%)`;
+                }
+                
+                li.innerHTML = `
+                    <div class="history-text">${truncateText(item.text, 30)}</div>
+                    <div class="history-category">${topCategory}${confidence}</div>
+                    <div class="history-time">${item.displayTime}</div>
+                `;
+                
+                // Add click event to load this analysis
+                li.addEventListener('click', function() {
+                    loadAnalysisFromHistory(item.id);
+                });
+                
+                historyList.appendChild(li);
+            });
+        }
+        
+        function loadAnalysisFromHistory(id) {
+            // Find the history item
+            const item = analysisHistory.find(item => item.id === id);
+            if (!item) return;
+            
+            // Set the text input
+            document.getElementById('textInput').value = item.text;
+            
+            // Display the results
+            document.getElementById('resultsContainer').style.display = 'block';
+            
+            // Set analysis time if available
+            if (item.results.analysis_time) {
+                document.getElementById('analysisTime').textContent = `Analysis completed in ${item.results.analysis_time}`;
+                document.getElementById('analysisTime').style.display = 'block';
+            } else {
+                document.getElementById('analysisTime').style.display = 'none';
+            }
+            
+            // Display results
+            if (item.results.error) {
+                document.getElementById('errorMessage').textContent = item.results.error;
+                document.getElementById('errorMessage').style.display = 'block';
+                document.getElementById('resultsContent').innerHTML = '';
+            } else {
+                document.getElementById('errorMessage').style.display = 'none';
+                displayResults(item.results);
+            }
+            
+            // Highlight the selected item
+            document.querySelectorAll('.history-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelector(`.history-item[data-id="${id}"]`).classList.add('active');
+            
+            // On mobile, close the sidebar after selection
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        }
+        
+        function displayResults(data) {
+            const resultsContent = document.getElementById('resultsContent');
+            resultsContent.innerHTML = '';
+            
+            if (!data.categories || data.categories.length === 0) {
+                resultsContent.innerHTML = '<p>No categories were identified with sufficient confidence (>60%).</p>';
+                return;
+            }
+            
+            // Sort categories by confidence (highest first)
+            data.categories.sort((a, b) => b.confidence - a.confidence);
+            
+            // Create a container for the categories
+            const categoriesContainer = document.createElement('div');
+            
+            // Add each category
+            data.categories.forEach(category => {
+                const categoryClass = getCategoryClass(category.category);
+                
+                const categoryCard = document.createElement('div');
+                categoryCard.className = `card category-card ${categoryClass}`;
+                
+                const cardBody = document.createElement('div');
+                cardBody.className = 'card-body';
+                
+                // Category name and confidence
+                const categoryHeader = document.createElement('div');
+                categoryHeader.className = 'd-flex justify-content-between align-items-center';
+                
+                const categoryName = document.createElement('h5');
+                categoryName.className = 'card-title mb-0';
+                categoryName.textContent = category.category;
+                
+                const confidenceText = document.createElement('span');
+                confidenceText.className = 'badge bg-secondary';
+                confidenceText.textContent = `${Math.round(category.confidence)}% Confidence`;
+                
+                categoryHeader.appendChild(categoryName);
+                categoryHeader.appendChild(confidenceText);
+                
+                // Confidence bar
+                const confidenceBar = document.createElement('div');
+                confidenceBar.className = 'progress confidence-bar';
+                
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                progressBar.style.width = `${category.confidence}%`;
+                progressBar.style.backgroundColor = getCategoryColor(category.category);
+                
+                confidenceBar.appendChild(progressBar);
+                
+                // Explanation
+                const explanation = document.createElement('p');
+                explanation.className = 'card-text mt-3';
+                explanation.textContent = category.explanation;
+                
+                // Assemble the card
+                cardBody.appendChild(categoryHeader);
+                cardBody.appendChild(confidenceBar);
+                cardBody.appendChild(explanation);
+                categoryCard.appendChild(cardBody);
+                
+                categoriesContainer.appendChild(categoryCard);
+            });
+            
+            resultsContent.appendChild(categoriesContainer);
+        }
+        
+        function getCategoryClass(categoryName) {
+            const name = categoryName.toLowerCase().replace(' - ', '-');
+            return name.replace(/\s+/g, '-');
+        }
+        
+        function getCategoryColor(categoryName) {
+            const categoryColors = {
+                'Capability - Physical': '#3498db',
+                'Capability - Psychological': '#2ecc71',
+                'Opportunity - Social': '#f39c12',
+                'Opportunity - Physical': '#e74c3c',
+                'Motivation - Automatic': '#9b59b6',
+                'Motivation - Reflective': '#e67e22'
+            };
+            
+            return categoryColors[categoryName] || '#6c757d';
+        }
+        
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+        
+        // Show toggle button on mobile
+        if (window.innerWidth <= 768) {
+            document.getElementById('toggleSidebar').style.display = 'block';
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                document.getElementById('toggleSidebar').style.display = 'block';
+            } else {
+                document.getElementById('toggleSidebar').style.display = 'none';
+                document.getElementById('sidebar').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html> 
