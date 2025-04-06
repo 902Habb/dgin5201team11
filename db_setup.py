@@ -1,4 +1,5 @@
-# db_setup.py
+# Set up a SQLite database for analyzing text using the COM-B. 
+# 4 tables: COMBCategory, Indicator, CodingExample, and AnalysisResult. 
 
 from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, Text
 from sqlalchemy.ext.declarative import declarative_base
@@ -75,13 +76,8 @@ class AnalysisResult(Base):
 
 # Create the database
 def setup_database():
-    # Create a SQLite database file in the current directory
     engine = create_engine('sqlite:///comb_analyzer.db')
-    
-    # Create all tables
     Base.metadata.create_all(engine)
-    
-    # Create a session factory
     Session = sessionmaker(bind=engine)
     
     return Session()

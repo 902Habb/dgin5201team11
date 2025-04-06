@@ -1,4 +1,4 @@
-# populate_comb_data.py
+# populate the database with COM-B framework data
 
 from db_setup import setup_database, COMBCategory, Indicator, CodingExample
 
@@ -37,11 +37,8 @@ def populate_comb_categories(session):
     for category_data in categories:
         category = COMBCategory(**category_data)
         session.add(category)
-    
-    # Commit the changes
+
     session.commit()
-    
-    # Return the created categories as a dictionary for easy reference
     return {cat.name: cat for cat in session.query(COMBCategory).all()}
 
 def populate_indicators(session, categories):
@@ -160,8 +157,6 @@ def populate_indicators(session, categories):
                     indicator_type=indicator_type
                 )
                 session.add(indicator)
-    
-    # Commit the changes
     session.commit()
 
 def populate_coding_examples(session, categories):
@@ -242,17 +237,13 @@ def populate_coding_examples(session, categories):
                 explanation=example['explanation']
             )
             session.add(coding_example)
-    
-    # Commit the changes
     session.commit()
 
 if __name__ == "__main__":
-    # Get a database session
     session = setup_database()
     
     # Populate the database with COM-B data
     categories = populate_comb_categories(session)
-    
     # Populate indicators and examples
     populate_indicators(session, categories)
     populate_coding_examples(session, categories)

@@ -1,4 +1,4 @@
-# model_handler.py
+# It builds a prompt using category info, gets a response from the model, extracts useful info in JSON format, and saves the result to a database.
 
 import os
 import json
@@ -162,33 +162,23 @@ Text to analyze:
         # Generate a response from the model with optimized parameters
         response = self.model.create_completion(
             prompt,
-            max_tokens=1024,  # Reduced max tokens for faster response
+            max_tokens=1024,
             temperature=0.1,  # Low temperature for more deterministic outputs
             top_p=0.9,
             stream=False,
-            stop=["</s>", "Human:", "User:"]  # Stop tokens to prevent the model from continuing
+            stop=["</s>", "Human:", "User:"]
         )
         
         # Extract the generated text
         generated_text = response["choices"][0]["text"].strip()
         
-        # Try to extract JSON from the response
+        # extract JSON from the response
         try:
-            # More robust JSON extraction
-            # First, look for the last complete JSON object in the response
-            # This handles cases where the model might generate multiple JSON objects
-            # or include explanatory text before/after the JSON
-            
-            # Find all opening braces
             open_brace_indices = [i for i, char in enumerate(generated_text) if char == '{']
-            
-            # If no JSON structure found
             if not open_brace_indices:
                 return {"error": "Could not extract valid JSON from model response", "raw_response": generated_text}
-            
-            # Try each potential JSON object, starting from the last one
+
             for start_index in reversed(open_brace_indices):
-                # Track nested braces to find the matching closing brace
                 brace_count = 0
                 end_index = -1
                 
@@ -258,8 +248,7 @@ Text to analyze:
         for result in results["categories"]:
             category_name = result.get("category")
             confidence = result.get("confidence", 0)
-            
-            # Skip if category name is not found
+
             if category_name not in category_id_by_name:
                 continue
             
@@ -271,25 +260,16 @@ Text to analyze:
                 session_id=session_id
             )
             self.db_session.add(analysis_result)
-        
-        # Commit the changes to the database
         self.db_session.commit()
 
 def test_model():
-    # Path to your Llama model file
-    # Use the exact filename as shown in your file structure
     model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Llama-3.2-3B-Instruct-Q8_0.gguf")
-    
-   # Create model handler
     handler = LlamaModelHandler(model_path)
     
     # Test text to code
     test_text = "I want to eat healthier, but I don't know how to prepare nutritious meals."
-    
-    # Run the coding
+
     results = handler.code_text(test_text)
-    
-    # Print results
     print(json.dumps(results, indent=2))
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+# This program takes text, sends it to a local Llama model for analysis, and shows the results on a webpage.
 import os
 import json
 import time
@@ -6,9 +7,9 @@ from model_handler import LlamaModelHandler
 
 app = Flask(__name__)
 
-# Initialize the model handler (lazy loading - will only load when needed)
 model_handler = None
 
+# call the model handler to load the model
 def get_model_handler():
     """
     Lazy initialization of the model handler to avoid loading the model
@@ -25,11 +26,13 @@ def get_model_handler():
         print(f"Model loaded in {load_time:.2f} seconds")
     return model_handler
 
+# main page
 @app.route('/')
 def index():
     """Render the main page with the text input form."""
     return render_template('index.html')
 
+# Analyze text when user submits the form
 @app.route('/analyze', methods=['POST'])
 def analyze():
     """
@@ -61,11 +64,8 @@ def analyze():
         return jsonify({'error': f'Error analyzing text: {str(e)}'})
 
 if __name__ == '__main__':
-    # Create templates directory if it doesn't exist
     os.makedirs('templates', exist_ok=True)
     
     # Set larger max content length for JSON responses (to handle history)
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
-    
-    # Run the Flask app
     app.run(debug=True) 
